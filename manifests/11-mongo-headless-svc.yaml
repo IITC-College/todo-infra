@@ -3,16 +3,10 @@ kind: Service
 metadata:
   name: mongo
   namespace: todo-app
-  labels:
-    app.kubernetes.io/name: mongo
-    app.kubernetes.io/component: database
-    app.kubernetes.io/part-of: todo-app
 spec:
   clusterIP: None
   selector:
     app: mongo
   ports:
-    - name: mongo
-      port: 27017
+    - port: 27017
       targetPort: 27017
-      protocol: TCP

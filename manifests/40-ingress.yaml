@@ -3,10 +3,6 @@ kind: Ingress
 metadata:
   name: todo-ingress
   namespace: todo-app
-  labels:
-    app.kubernetes.io/name: todo-ingress
-    app.kubernetes.io/component: ingress
-    app.kubernetes.io/part-of: todo-app
   annotations:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing

@@ -3,16 +3,9 @@ kind: Service
 metadata:
   name: backend
   namespace: todo-app
-  labels:
-    app.kubernetes.io/name: backend
-    app.kubernetes.io/component: backend
-    app.kubernetes.io/part-of: todo-app
 spec:
-  type: ClusterIP
   selector:
     app: backend
   ports:
-    - name: http
-      port: 80
+    - port: 80
       targetPort: 8080
-      protocol: TCP

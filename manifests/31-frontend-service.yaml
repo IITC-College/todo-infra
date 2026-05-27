@@ -3,16 +3,9 @@ kind: Service
 metadata:
   name: frontend
   namespace: todo-app
-  labels:
-    app.kubernetes.io/name: frontend
-    app.kubernetes.io/component: frontend
-    app.kubernetes.io/part-of: todo-app
 spec:
-  type: ClusterIP
   selector:
     app: frontend
   ports:
-    - name: http
-      port: 80
+    - port: 80
       targetPort: 8080
-      protocol: TCP

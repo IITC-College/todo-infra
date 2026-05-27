@@ -3,10 +3,6 @@ kind: Deployment
 metadata:
   name: backend
   namespace: todo-app
-  labels:
-    app.kubernetes.io/name: backend
-    app.kubernetes.io/component: backend
-    app.kubernetes.io/part-of: todo-app
 spec:
   replicas: 2
   selector:
@@ -16,22 +12,16 @@ spec:
     metadata:
       labels:
         app: backend
-        app.kubernetes.io/name: backend
-        app.kubernetes.io/component: backend
-        app.kubernetes.io/part-of: todo-app
     spec:
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
       containers:
         - name: backend
-          # CI pipeline replaces :latest with :<git-sha> before apply
           image: 050752632489.dkr.ecr.eu-west-1.amazonaws.com/todo-backend:latest
           imagePullPolicy: Always
           ports:
-            - name: http
-              containerPort: 8080
-              protocol: TCP
+            - containerPort: 8080
           envFrom:
             - secretRef:
                 name: backend-secret
@@ -46,26 +36,19 @@ spec:
               cpu: 300m
               memory: 256Mi
           securityContext:
-            runAsNonRoot: true
-            runAsUser: 1000
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:
-              drop:
-                - ALL
+              drop: [ALL]
           livenessProbe:
             httpGet:
               path: /healthz
               port: 8080
             initialDelaySeconds: 10
             periodSeconds: 10
-            timeoutSeconds: 3
-            failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /readyz
               port: 8080
             initialDelaySeconds: 5
             periodSeconds: 5
-            timeoutSeconds: 3
-            failureThreshold: 3

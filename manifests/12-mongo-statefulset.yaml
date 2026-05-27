@@ -3,12 +3,8 @@ kind: StatefulSet
 metadata:
   name: mongo
   namespace: todo-app
-  labels:
-    app.kubernetes.io/name: mongo
-    app.kubernetes.io/component: database
-    app.kubernetes.io/part-of: todo-app
 spec:
-  serviceName: mongo          # must match headless Service name in 11-mongo-headless-svc.yaml
+  serviceName: mongo
   replicas: 1
   selector:
     matchLabels:
@@ -17,25 +13,17 @@ spec:
     metadata:
       labels:
         app: mongo
-        app.kubernetes.io/name: mongo
-        app.kubernetes.io/component: database
-        app.kubernetes.io/part-of: todo-app
     spec:
-      # NOTE: runAsNonRoot is false because the official mongo image requires
-      # root to initialise /data/db (chown to uid 999). Set to true only if
-      # using a custom rootless mongo image.
+      # mongo image requires root to init /data/db — runAsNonRoot must be false
       securityContext:
         runAsNonRoot: false
-        fsGroup: 999            # mongo group — ensures PVC is writable by mongo user
+        fsGroup: 999
       containers:
         - name: mongo
-          # CI pipeline replaces :latest with :<git-sha> before apply
           image: 050752632489.dkr.ecr.eu-west-1.amazonaws.com/todo-database:latest
           imagePullPolicy: Always
           ports:
-            - name: mongo
-              containerPort: 27017
-              protocol: TCP
+            - containerPort: 27017
           envFrom:
             - secretRef:
                 name: mongo-secret
@@ -51,32 +39,21 @@ spec:
               mountPath: /data/db
           livenessProbe:
             exec:
-              command:
-                - mongosh
-                - --eval
-                - "db.adminCommand('ping')"
+              command: ["mongosh", "--eval", "db.adminCommand('ping')"]
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
-            failureThreshold: 3
           readinessProbe:
             exec:
-              command:
-                - mongosh
-                - --eval
-                - "db.adminCommand('ping')"
+              command: ["mongosh", "--eval", "db.adminCommand('ping')"]
             initialDelaySeconds: 20
             periodSeconds: 10
             timeoutSeconds: 5
-            failureThreshold: 3
   volumeClaimTemplates:
     - metadata:
         name: mongo-data
-        labels:
-          app.kubernetes.io/part-of: todo-app
       spec:
-        accessModes:
-          - ReadWriteOnce
+        accessModes: [ReadWriteOnce]
         storageClassName: gp3
         resources:
           requests:
