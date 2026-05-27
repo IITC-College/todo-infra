@@ -1,0 +1,35 @@
+# Helm values for eks/aws-load-balancer-controller
+# Chart: eks/aws-load-balancer-controller
+# Repo:  https://aws.github.io/eks-charts
+#
+# Usage:
+#   helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-controller \
+#     -n kube-system -f alb-controller-values.yaml
+#
+# Before installing, replace <VPC_ID> with the actual VPC ID from:
+#   aws eks describe-cluster --name iitc-todo-cluster --query "cluster.resourcesVpcConfig.vpcId" --output text
+
+clusterName: iitc-todo-cluster
+
+region: eu-west-1
+
+vpcId: <VPC_ID>   # REPLACE before installing
+
+serviceAccount:
+  create: false
+  name: aws-load-balancer-controller
+
+replicaCount: 2
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+podDisruptionBudget:
+  maxUnavailable: 1
+
+# Tolerations / nodeSelector left as defaults (schedule on any node)

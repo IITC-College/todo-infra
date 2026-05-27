@@ -1,0 +1,67 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: iitc-todo-cluster
+  region: eu-west-1
+  version: "1.31"
+  tags:
+    project: iitc-todo
+    env: course
+
+iam:
+  withOIDC: true
+  serviceAccounts:
+    - metadata:
+        name: aws-load-balancer-controller
+        namespace: kube-system
+        labels:
+          app.kubernetes.io/component: controller
+          app.kubernetes.io/name: aws-load-balancer-controller
+      attachPolicyARNs:
+        # Course-grade policy. Production clusters should use the scoped
+        # AWSLoadBalancerControllerIAMPolicy (created manually or via CloudFormation).
+        - arn:aws:iam::aws:policy/ElasticLoadBalancingFullAccess
+    - metadata:
+        name: ebs-csi-controller-sa
+        namespace: kube-system
+      wellKnownPolicies:
+        ebsCSIController: true
+
+managedNodeGroups:
+  - name: ng-main
+    instanceType: t3.medium
+    desiredCapacity: 2
+    minSize: 2
+    maxSize: 4
+    volumeSize: 30
+    volumeType: gp3
+    privateNetworking: false
+    amiFamily: AmazonLinux2
+    tags:
+      nodegroup: ng-main
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+        albIngress: true
+        cloudWatch: true
+
+addons:
+  - name: vpc-cni
+    resolveConflicts: overwrite
+  - name: coredns
+    resolveConflicts: overwrite
+  - name: kube-proxy
+    resolveConflicts: overwrite
+  - name: aws-ebs-csi-driver
+    resolveConflicts: overwrite
+    serviceAccountRoleARN: arn:aws:iam::050752632489:role/eksctl-iitc-todo-cluster-addon-iamserviceaccount-kube-system-ebs-csi-controller-sa
+
+cloudWatch:
+  clusterLogging:
+    enableTypes:
+      - api
+      - audit
+      - authenticator
+      - controllerManager
+      - scheduler

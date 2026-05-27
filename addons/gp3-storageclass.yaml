@@ -1,0 +1,28 @@
+# gp3 StorageClass — backed by the EBS CSI driver (aws-ebs-csi-driver addon)
+#
+# After applying this file, remove the default annotation from the legacy gp2 class:
+#   kubectl patch storageclass gp2 \
+#     -p '{"metadata":{"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'
+#
+# Verify:
+#   kubectl get storageclass
+#   (gp3 should show "(default)", gp2 should not)
+
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: gp3
+  annotations:
+    # Mark gp3 as the cluster-wide default StorageClass.
+    # Remove the matching annotation from gp2 — see patch command above.
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: ebs.csi.aws.com
+volumeBindingMode: WaitForFirstConsumer   # Binds PV only when a Pod is scheduled (AZ-aware)
+reclaimPolicy: Retain                      # Keeps the EBS volume on PVC deletion — change to Delete for ephemeral workloads
+allowVolumeExpansion: true
+parameters:
+  type: gp3
+  fsType: ext4
+  # Optional throughput / iops tuning (defaults shown):
+  # throughput: "125"    # MiB/s
+  # iops: "3000"

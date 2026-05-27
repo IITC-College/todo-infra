@@ -1,0 +1,37 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ECRAuthToken",
+      "Effect": "Allow",
+      "Action": "ecr:GetAuthorizationToken",
+      "Resource": "*"
+    },
+    {
+      "Sid": "ECRPushTodoRepos",
+      "Effect": "Allow",
+      "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:CompleteLayerUpload",
+        "ecr:InitiateLayerUpload",
+        "ecr:PutImage",
+        "ecr:UploadLayerPart",
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:DescribeRepositories",
+        "ecr:ListImages"
+      ],
+      "Resource": [
+        "arn:aws:ecr:eu-west-1:050752632489:repository/todo-frontend",
+        "arn:aws:ecr:eu-west-1:050752632489:repository/todo-backend",
+        "arn:aws:ecr:eu-west-1:050752632489:repository/todo-database"
+      ]
+    },
+    {
+      "Sid": "EKSDescribeCluster",
+      "Effect": "Allow",
+      "Action": "eks:DescribeCluster",
+      "Resource": "arn:aws:eks:eu-west-1:050752632489:cluster/iitc-todo-cluster"
+    }
+  ]
+}

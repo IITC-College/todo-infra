@@ -1,0 +1,26 @@
+# metrics-server - Kubernetes resource metrics pipeline
+#
+# Upstream source:
+#   https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+#
+# This kustomization pulls the upstream manifest and applies the patch needed for
+# EKS (--kubelet-insecure-tls is NOT required on EKS; keep it clean).
+#
+# Apply with:
+#   kubectl apply -k addons/   (if using this kustomization)
+# OR directly:
+#   kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+#
+# Verify:
+#   kubectl get deployment metrics-server -n kube-system
+#   kubectl top nodes
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: kube-system
+
+resources:
+  - https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+
+# No patches needed for standard EKS — upstream manifest works as-is.
